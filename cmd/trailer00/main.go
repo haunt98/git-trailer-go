@@ -32,7 +32,7 @@ func main() {
 	}
 
 	for _, model := range sessionExportModels {
-		fmt.Printf("Co-Authored-By: opencode %s %s <noreply@opencode.ai>\n",
+		fmt.Printf("Co-Authored-By: OpenCode %s %s <noreply@opencode.ai>\n",
 			model.ProviderID,
 			model.ModelID,
 		)
