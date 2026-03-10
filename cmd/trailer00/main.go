@@ -27,7 +27,10 @@ func main() {
 		return
 	}
 
-	fmt.Println("Co-Authored-By: opencode " + sessionExportModel.ProviderID + " " + sessionExportModel.ModelID + " <noreply@opencode.ai>")
+	fmt.Printf("Co-Authored-By: opencode %s %s <noreply@opencode.ai>\n",
+		sessionExportModel.ProviderID,
+		sessionExportModel.ModelID,
+	)
 }
 
 func getRecentSessionID(ctx context.Context) (string, error) {
