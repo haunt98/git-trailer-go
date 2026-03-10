@@ -1,11 +1,13 @@
 package main
 
 import (
+	"cmp"
 	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"os/exec"
+	"slices"
 )
 
 func main() {
@@ -16,21 +18,25 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	sessionExportModel, err := getRecentSessionExportModel(ctx, sessionID)
+	if sessionID == "" {
+		return
+	}
+
+	sessionExportModels, err := getRecentSessionExportModels(ctx, sessionID)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	if sessionExportModel.ProviderID == "" ||
-		sessionExportModel.ModelID == "" {
-		fmt.Println("No recent session")
+	if len(sessionExportModels) == 0 {
 		return
 	}
 
-	fmt.Printf("Co-Authored-By: opencode %s %s <noreply@opencode.ai>\n",
-		sessionExportModel.ProviderID,
-		sessionExportModel.ModelID,
-	)
+	for _, model := range sessionExportModels {
+		fmt.Printf("Co-Authored-By: opencode %s %s <noreply@opencode.ai>\n",
+			model.ProviderID,
+			model.ModelID,
+		)
+	}
 }
 
 func getRecentSessionID(ctx context.Context) (string, error) {
@@ -53,24 +59,38 @@ func getRecentSessionID(ctx context.Context) (string, error) {
 	return sessionListItems[0].ID, nil
 }
 
-func getRecentSessionExportModel(ctx context.Context, sessionID string) (SessionExportModel, error) {
+func getRecentSessionExportModels(ctx context.Context, sessionID string) ([]SessionExportModel, error) {
 	args := []string{"export", sessionID}
 	output, err := exec.CommandContext(ctx, "opencode", args...).Output()
 	if err != nil {
-		return SessionExportModel{}, fmt.Errorf("session: failed: %w", err)
+		return nil, fmt.Errorf("session: failed: %w", err)
 	}
 
 	var data SessionExportData
 	if err := json.Unmarshal(output, &data); err != nil {
-		return SessionExportModel{}, fmt.Errorf("json: failed to unmarshal: %w", err)
+		return nil, fmt.Errorf("json: failed to unmarshal: %w", err)
 	}
 
+	models := make([]SessionExportModel, 0, len(data.Messages))
 	for _, message := range data.Messages {
 		if message.Info.Model.ProviderID != "" &&
 			message.Info.Model.ModelID != "" {
-			return message.Info.Model, nil
+			models = append(models, message.Info.Model)
 		}
 	}
 
-	return SessionExportModel{}, nil
+	slices.SortFunc(models, func(a, b SessionExportModel) int {
+		return cmp.Or(
+			cmp.Compare(a.ProviderID, b.ProviderID),
+			cmp.Compare(a.ModelID, b.ModelID),
+		)
+	})
+
+	// Dedupe
+	models = slices.CompactFunc(models, func(a, b SessionExportModel) bool {
+		return a.ProviderID == b.ProviderID &&
+			a.ModelID == b.ModelID
+	})
+
+	return models, nil
 }
