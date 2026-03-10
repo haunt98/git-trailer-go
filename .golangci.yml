@@ -1,0 +1,89 @@
+version: "2"
+run:
+  tests: false
+linters:
+  default: none
+  enable:
+    - bodyclose
+    - copyloopvar
+    - err113
+    - errcheck
+    - errchkjson
+    - errname
+    - errorlint
+    - fatcontext
+    - forcetypeassert
+    - gocritic
+    - gosec
+    - govet
+    - importas
+    - ineffassign
+    - makezero
+    - nilnil
+    - noctx
+    - prealloc
+    - reassign
+    - sqlclosecheck
+    - staticcheck
+    - unconvert
+    - unused
+  settings:
+    gocritic:
+      disabled-checks:
+        - ifElseChain
+        - singleCaseSwitch
+        - unnamedResult
+        - whyNoLint
+      enabled-tags:
+        - diagnostic
+        - style
+    gosec:
+      excludes:
+        - G101
+        - G112
+        - G115
+        - G117
+        - G204
+        - G402
+        - G703
+        - G704
+    govet:
+      enable-all: true
+      disable:
+        - shadow
+    reassign:
+      patterns:
+        - .*
+    staticcheck:
+      checks:
+        - all
+        - -ST1000
+        - -ST1003
+        - -ST1005
+        - -SA1019
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - std-error-handling
+      - common-false-positives
+      - legacy
+    paths:
+      - .*Mock.*
+      - .*_mock.*
+      - .*test.*
+      - .*mock.*
+      - .*example.*
+      - .*utils.*
+formatters:
+  enable:
+    - gofumpt
+  exclusions:
+    generated: lax
+    paths:
+      - .*Mock.*
+      - .*_mock.*
+      - .*test.*
+      - .*mock.*
+      - .*example.*
+      - .*utils.*
