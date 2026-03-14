@@ -7,10 +7,14 @@ import (
 	"log/slog"
 )
 
-var flagSessionID string
+var (
+	flagSessionID          string
+	flagSkipModelsDevCache bool
+)
 
 func init() {
 	flag.StringVar(&flagSessionID, "session", "", "which opencode sessionID to export")
+	flag.BoolVar(&flagSkipModelsDevCache, "skip-models-dev-cache", false, "skip models.dev cache")
 }
 
 func main() {
@@ -41,7 +45,7 @@ func main() {
 		return
 	}
 
-	modelsDevData, err := LoadModelsDevData(ctx)
+	modelsDevData, err := LoadModelsDevData(ctx, flagSkipModelsDevCache)
 	if err != nil {
 		slog.Error("LoadModelsDevData", "error", err)
 		return

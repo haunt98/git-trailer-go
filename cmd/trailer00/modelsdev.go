@@ -22,7 +22,7 @@ const (
 
 var ErrHTTPStatusNotOK = errors.New("http status code not ok")
 
-func LoadModelsDevData(ctx context.Context) (ModelsDevData, error) {
+func LoadModelsDevData(ctx context.Context, skipCache bool) (ModelsDevData, error) {
 	userCacheDir, err := os.UserCacheDir()
 	if err != nil {
 		return nil, fmt.Errorf("os: failed to get user cache dir: %w", err)
@@ -30,16 +30,18 @@ func LoadModelsDevData(ctx context.Context) (ModelsDevData, error) {
 
 	cacheFilePath := filepath.Join(userCacheDir, "trailer00", modelsDevCacheFile)
 
-	if cacheFileInfo, err := os.Stat(cacheFilePath); err == nil {
-		if time.Since(cacheFileInfo.ModTime()) <= modelsDevCacheTTL {
-			data, err := os.ReadFile(cacheFilePath)
-			if err == nil {
-				var api ModelsDevData
-				if err := sonic.Unmarshal(data, &api); err == nil {
-					return api, nil
-				}
+	if !skipCache {
+		if cacheFileInfo, err := os.Stat(cacheFilePath); err == nil {
+			if time.Since(cacheFileInfo.ModTime()) <= modelsDevCacheTTL {
+				data, err := os.ReadFile(cacheFilePath)
+				if err == nil {
+					var api ModelsDevData
+					if err := sonic.Unmarshal(data, &api); err == nil {
+						return api, nil
+					}
 
-				// Invalid cache
+					// Invalid cache
+				}
 			}
 		}
 	}
