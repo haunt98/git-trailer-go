@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## v0.0.4 (2026-03-15)
+
+### Added
+
+- feat: add flag to skip models.dev cache (2026-03-15)
+
+- feat: cache models dev in 24h (2026-03-15)
+
+- feat: load provider, model name from https://models.dev/ (2026-03-15)
+
+### Others
+
+- chore: add usage (2026-03-15)
+
+- chore(changelog): generate v0.0.3 (2026-03-15)
+
 ## v0.0.3 (2026-03-15)
 
 ### Added
