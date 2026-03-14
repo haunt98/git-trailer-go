@@ -4,6 +4,8 @@ import (
 	"cmp"
 	"context"
 	"fmt"
+	"log/slog"
+	"os"
 	"os/exec"
 	"slices"
 
@@ -31,10 +33,33 @@ func GetRecentSessionID(ctx context.Context) (string, error) {
 }
 
 func GetSessionExportModels(ctx context.Context, sessionID string) ([]SessionExportModel, error) {
-	args := []string{"export", sessionID}
-	output, err := exec.CommandContext(ctx, "opencode", args...).Output()
+	tempFile, err := os.CreateTemp("", "opencode-export-*.json")
 	if err != nil {
-		return nil, fmt.Errorf("session: failed: %w", err)
+		return nil, fmt.Errorf("os: failed to create temp: %w", err)
+	}
+	defer func() {
+		if err := tempFile.Close(); err != nil {
+			slog.Error("tempFile.Close", "error", err)
+			return
+		}
+
+		if err := os.Remove(tempFile.Name()); err != nil {
+			slog.Error("os.Remove", "error", err)
+			return
+		}
+	}()
+
+	args := []string{"export", sessionID}
+	cmd := exec.CommandContext(ctx, "opencode", args...)
+	cmd.Stdout = tempFile
+
+	if err := cmd.Run(); err != nil {
+		return nil, fmt.Errorf("opencode: failed: %w", err)
+	}
+
+	output, err := os.ReadFile(tempFile.Name())
+	if err != nil {
+		return nil, fmt.Errorf("os: failed to read file: %w", err)
 	}
 
 	var data SessionExportData
