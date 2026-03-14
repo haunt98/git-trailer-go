@@ -2,25 +2,39 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
-	"log"
+	"log/slog"
 )
 
+var flagSessionID string
+
+func init() {
+	flag.StringVar(&flagSessionID, "session", "", "which sessionID to export")
+}
+
 func main() {
+	flag.Parse()
+
 	ctx := context.Background()
 
-	sessionID, err := GetRecentSessionID(ctx)
-	if err != nil {
-		log.Fatalln(err)
+	if flagSessionID == "" {
+		var err error
+		flagSessionID, err = GetRecentSessionID(ctx)
+		if err != nil {
+			slog.Error("GetRecentSessionID", "error", err)
+			return
+		}
 	}
 
-	if sessionID == "" {
+	if flagSessionID == "" {
 		return
 	}
 
-	sessionExportModels, err := GetRecentSessionExportModels(ctx, sessionID)
+	sessionExportModels, err := GetSessionExportModels(ctx, flagSessionID)
 	if err != nil {
-		log.Fatalln(err)
+		slog.Error("GetSessionExportModels", "error", err)
+		return
 	}
 
 	if len(sessionExportModels) == 0 {

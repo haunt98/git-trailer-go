@@ -30,7 +30,7 @@ func GetRecentSessionID(ctx context.Context) (string, error) {
 	return sessionListItems[0].ID, nil
 }
 
-func GetRecentSessionExportModels(ctx context.Context, sessionID string) ([]SessionExportModel, error) {
+func GetSessionExportModels(ctx context.Context, sessionID string) ([]SessionExportModel, error) {
 	args := []string{"export", sessionID}
 	output, err := exec.CommandContext(ctx, "opencode", args...).Output()
 	if err != nil {
