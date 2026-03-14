@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/bytedance/sonic"
 )
@@ -16,6 +17,7 @@ import (
 const (
 	modelsDevURL       = "https://models.dev/api.json"
 	modelsDevCacheFile = "models-dev.json"
+	modelsDevCacheTTL  = 24 * time.Hour
 )
 
 var ErrHTTPStatusNotOK = errors.New("http status code not ok")
@@ -28,15 +30,17 @@ func LoadModelsDevData(ctx context.Context) (ModelsDevData, error) {
 
 	cacheFilePath := filepath.Join(userCacheDir, "trailer00", modelsDevCacheFile)
 
-	if _, err := os.Stat(cacheFilePath); err == nil {
-		data, err := os.ReadFile(cacheFilePath)
-		if err == nil {
-			var api ModelsDevData
-			if err := sonic.Unmarshal(data, &api); err == nil {
-				return api, nil
-			}
+	if cacheFileInfo, err := os.Stat(cacheFilePath); err == nil {
+		if time.Since(cacheFileInfo.ModTime()) <= modelsDevCacheTTL {
+			data, err := os.ReadFile(cacheFilePath)
+			if err == nil {
+				var api ModelsDevData
+				if err := sonic.Unmarshal(data, &api); err == nil {
+					return api, nil
+				}
 
-			// Invalid cache
+				// Invalid cache
+			}
 		}
 	}
 
