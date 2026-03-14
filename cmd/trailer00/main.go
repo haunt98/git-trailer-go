@@ -10,7 +10,7 @@ import (
 var flagSessionID string
 
 func init() {
-	flag.StringVar(&flagSessionID, "session", "", "which sessionID to export")
+	flag.StringVar(&flagSessionID, "session", "", "which opencode sessionID to export")
 }
 
 func main() {
@@ -41,10 +41,17 @@ func main() {
 		return
 	}
 
+	modelsDevData, err := LoadModelsDevData(ctx)
+	if err != nil {
+		slog.Error("LoadModelsDevData", "error", err)
+		return
+	}
+
 	for _, model := range sessionExportModels {
-		fmt.Printf("Co-Authored-By: OpenCode %s %s <noreply@opencode.ai>\n",
-			model.ProviderID,
-			model.ModelID,
+		providerName, modelName := modelsDevData.LookupName(model.ProviderID, model.ModelID)
+		fmt.Printf("Co-Authored-By: OpenCode - %s - %s <noreply@opencode.ai>\n",
+			providerName,
+			modelName,
 		)
 	}
 }
