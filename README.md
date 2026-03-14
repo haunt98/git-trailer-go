@@ -6,8 +6,20 @@
 
 ## `trailer00`
 
+Support [OpenCode](https://github.com/anomalyco/opencode)
+
 Install:
 
 ```sh
 go install github.com/haunt98/git-trailer-go/cmd/trailer00@latest
+```
+
+Usage:
+
+```sh
+# Latest session
+trailer00
+
+# Specific session
+trailer00 --session ses_XXX
 ```
