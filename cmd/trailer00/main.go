@@ -3,11 +3,12 @@ package main
 import (
 	"cmp"
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"os/exec"
 	"slices"
+
+	"github.com/bytedance/sonic"
 )
 
 func main() {
@@ -47,7 +48,7 @@ func getRecentSessionID(ctx context.Context) (string, error) {
 	}
 
 	var sessionListItems []SessionListItem
-	if err := json.Unmarshal(output, &sessionListItems); err != nil {
+	if err := sonic.Unmarshal(output, &sessionListItems); err != nil {
 		return "", fmt.Errorf("json: failed to unmarshal: %w", err)
 	}
 
@@ -67,7 +68,7 @@ func getRecentSessionExportModels(ctx context.Context, sessionID string) ([]Sess
 	}
 
 	var data SessionExportData
-	if err := json.Unmarshal(output, &data); err != nil {
+	if err := sonic.Unmarshal(output, &data); err != nil {
 		return nil, fmt.Errorf("json: failed to unmarshal: %w", err)
 	}
 
