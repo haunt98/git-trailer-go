@@ -53,7 +53,8 @@ func main() {
 
 	for _, model := range sessionExportModels {
 		providerName, modelName := modelsDevData.LookupName(model.ProviderID, model.ModelID)
-		fmt.Printf("Co-Authored-By: OpenCode - %s - %s <noreply@opencode.ai>\n",
+		fmt.Printf(
+			"Co-Authored-By: OpenCode - %s - %s <noreply@opencode.ai>\n",
 			providerName,
 			modelName,
 		)
